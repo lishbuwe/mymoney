@@ -1,26 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-
-<!-- iOS伪App配置 -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="小账本">
-
-<!-- 主题色（和你UI一致） -->
 <meta name="theme-color" content="#F7F3EE">
-
 <title>小账本</title>
 
-<!-- ⭐ 图标（核心） -->
-<link rel="apple-touch-icon" href="./lulu-wallet.png?v=1">
-<link rel="apple-touch-icon-precomposed" href="./lulu-wallet.png?v=1">
-<link rel="icon" href="./lulu-wallet.png?v=1">
+<link rel="apple-touch-icon" href="/mymoney/lulu-wallet.png?v=2">
+<link rel="apple-touch-icon-precomposed" href="/mymoney/lulu-wallet.png?v=2">
+<link rel="icon" href="/mymoney/lulu-wallet.png?v=2">
 
-<!-- 字体 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{
+    width:100%;
+    min-height:100%;
+    background:#F7F3EE;
+    color:#1A1A2E;
+    font-family:'Sora',-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  :root{
+    --bg:#F7F3EE;--card:#FFFFFF;--income:#00A878;--expense:#FF5252;
+    --primary:#5B5FED;--text:#1A1A2E;--sub:#8B8BA7;--border:#EDE9E3;
+    --shadow:0 2px 14px rgba(26,26,46,0.07);
+  }
+</style>
+</head>
 <style>
   body{font-family:'Sora',sans-serif;background:var(--bg);min-height:100dvh;max-width:430px;margin:0 auto;overflow-x:hidden;}
   ::-webkit-scrollbar{display:none;}
