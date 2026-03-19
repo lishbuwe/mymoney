@@ -805,6 +805,23 @@ function exportCSV(){
 }
 function importCSV(input){
   const file=input.files[0];if(!file)return;
+ function normalizeDate(s){
+  // 把 2026/3/19 或 2026.3.19 统一转成 2026-03-19
+  s=s.replace(/[\/\.]/g,'-');
+  const parts=s.split('-');
+  if(parts.length!==3)return s;
+  return parts[0]+'-'+parts[1].padStart(2,'0')+'-'+parts[2].padStart(2,'0');
+}
+function resolveCategory(type,raw){
+  const arr=type==='income'?IC:EC;
+  // 先按 id 找
+  if(arr.find(c=>c.id===raw))return raw;
+  // 再按名称找
+  const byName=arr.find(c=>c.name===raw);
+  if(byName)return byName.id;
+  // 找不到就归入其他
+  return arr.find(c=>c.id==='other')?.id||arr[0]?.id||'other';
+}
   function parseAndLoad(text){
     const lines=text.replace(/^\uFEFF/,'').split('\n').filter(l=>l.trim());
     if(lines.length<2)throw new Error('文件为空');
@@ -813,9 +830,9 @@ function importCSV(input){
     function pl(line){const ps=[];let c='',q=false;for(const ch of line){if(ch==='"'){q=!q;}else if(ch===','&&!q){ps.push(c);c='';}else{c+=ch;}}ps.push(c);return ps;}
     const imp=lines.slice(1).map(l=>{const p=pl(l);return{
       id:(p[idx('id')]||'').trim()||uid(),
-      date:(p[idx('date')]||'').trim(),
+      date:normalizeDate((p[idx('date')]||'').trim()),
       type:(p[idx('type')]||'expense').trim()||'expense',
-      category:(p[idx('category')]||'other').trim(),
+      category:resolveCategory((p[idx('type')]||'expense').trim(),(p[idx('category')]||'').trim()),
       amount:parseFloat(p[idx('amount')])||0,
       note:(p[idx('note')]||'').trim(),
       tags:p[idx('tags')]?p[idx('tags')].trim().split(/\s+/).filter(Boolean):[],
