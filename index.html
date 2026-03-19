@@ -378,7 +378,11 @@ const today=()=>new Date().toISOString().slice(0,10);
 const nowYM=()=>new Date().toISOString().slice(0,7);
 const fmtA=n=>Math.abs(n).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
 function fmtD(ds){const d=new Date(ds+'T00:00:00'),t=new Date();t.setHours(0,0,0,0);const df=Math.round((t-d)/86400000);if(df===0)return'今天';if(df===1)return'昨天';return`${d.getMonth()+1}月${d.getDate()}日`;}
-function getCat(type,id){return(type==='expense'?EC:IC).find(c=>c.id===id)||{name:id,icon:'?',color:'#ccc'};}
+function getCat(type,id){
+  const arr=type==='expense'?EC:IC;
+  const def=type==='expense'?DEF_EXP:DEF_INC;
+  return arr.find(c=>c.id===id)||def.find(c=>c.id===id)||arr.find(c=>c.name===id)||{name:id,icon:'?',color:'#ccc'};
+}
 function shiftYM(ym,d){const[y,m]=ym.split('-').map(Number),dt=new Date(y,m-1+d,1);return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;}
 function uid(){return`${Date.now()}_${Math.random().toString(36).slice(2)}`;}
 function toast(msg,col){const t=document.getElementById('toast');t.textContent=msg;t.style.background=col||'var(--income)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
