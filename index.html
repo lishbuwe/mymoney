@@ -805,19 +805,39 @@ function exportCSV(){
 }
 function importCSV(input){
   const file=input.files[0];if(!file)return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    try{
-      const lines=ev.target.result.replace(/^\uFEFF/,'').split('\n').filter(l=>l.trim());
-      const hdr=lines[0].split(','),idx=k=>hdr.indexOf(k);
-      function pl(line){const ps=[];let c='',q=false;for(const ch of line){if(ch==='"'){q=!q;}else if(ch===','&&!q){ps.push(c);c='';}else{c+=ch;}}ps.push(c);return ps;}
-      const imp=lines.slice(1).map(l=>{const p=pl(l);return{id:p[idx('id')]||uid(),date:p[idx('date')],type:p[idx('type')],category:p[idx('category')],amount:parseFloat(p[idx('amount')])||0,note:p[idx('note')]||'',tags:p[idx('tags')]?p[idx('tags')].trim().split(/\s+/).filter(Boolean):[]};}).filter(t=>t.date&&t.type&&t.amount>0);
-      const ex=new Set(TXN.map(t=>t.id));
-      TXN=[...imp.filter(t=>!ex.has(t.id)),...TXN].sort((a,b)=>b.date.localeCompare(a.date));
-      save();showSettingsMsg(`成功导入 ${imp.length} 条记录`);renderSettings();
-    }catch{showSettingsMsg('导入失败，请检查文件格式');}
+  function parseAndLoad(text){
+    const lines=text.replace(/^\uFEFF/,'').split('\n').filter(l=>l.trim());
+    if(lines.length<2)throw new Error('文件为空');
+    const hdr=lines[0].split(','),idx=k=>hdr.indexOf(k);
+    if(idx('date')<0||idx('amount')<0)throw new Error('找不到必要列');
+    function pl(line){const ps=[];let c='',q=false;for(const ch of line){if(ch==='"'){q=!q;}else if(ch===','&&!q){ps.push(c);c='';}else{c+=ch;}}ps.push(c);return ps;}
+    const imp=lines.slice(1).map(l=>{const p=pl(l);return{
+      id:(p[idx('id')]||'').trim()||uid(),
+      date:(p[idx('date')]||'').trim(),
+      type:(p[idx('type')]||'expense').trim()||'expense',
+      category:(p[idx('category')]||'other').trim(),
+      amount:parseFloat(p[idx('amount')])||0,
+      note:(p[idx('note')]||'').trim(),
+      tags:p[idx('tags')]?p[idx('tags')].trim().split(/\s+/).filter(Boolean):[],
+    };}).filter(t=>t.date&&t.amount>0);
+    const ex=new Set(TXN.map(t=>t.id));
+    const newOnes=imp.filter(t=>!ex.has(t.id));
+    TXN=[...newOnes,...TXN].sort((a,b)=>b.date.localeCompare(a.date));
+    save();showSettingsMsg('成功导入 '+imp.length+' 条，新增 '+newOnes.length+' 条');renderSettings();
+  }
+  const r1=new FileReader();
+  r1.onload=ev=>{
+    const txt=ev.target.result;
+    if(txt.includes('\uFFFD')){
+      const r2=new FileReader();
+      r2.onload=ev2=>{try{parseAndLoad(ev2.target.result);}catch(e){showSettingsMsg('导入失败：'+e.message);}};
+      r2.readAsText(file,'GBK');
+    }else{
+      try{parseAndLoad(txt);}catch(e){showSettingsMsg('导入失败：'+e.message);}
+    }
   };
-  r.readAsText(file,'UTF-8');input.value='';
+  r1.readAsText(file,'UTF-8');
+  input.value='';
 }
 function clearAll(){if(confirm('确定清空全部数据？此操作无法撤销。')){TXN=[];save();showSettingsMsg('数据已清空');renderSettings();}}
 
